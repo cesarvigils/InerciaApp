@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "895850354448",
+    "firebase_url": "https://inerciaapp-e0cc4-default-rtdb.firebaseio.com",
+    "project_id": "inerciaapp-e0cc4",
+    "storage_bucket": "inerciaapp-e0cc4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:895850354448:android:57421296c0dd25e92bb795",
+        "android_client_info": {
+          "package_name": "com.example.inercia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT9pfCG8rEzixrAxCokV-YXJxyTHTcFB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

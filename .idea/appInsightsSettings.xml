@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.inercia" />
+                  <option name="mobileSdkAppId" value="1:895850354448:android:57421296c0dd25e92bb795" />
+                  <option name="projectId" value="inerciaapp-e0cc4" />
+                  <option name="projectNumber" value="895850354448" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
