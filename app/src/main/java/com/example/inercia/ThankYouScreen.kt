@@ -32,38 +32,48 @@ fun ThankYouScreen(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .background(Color.Black)
-            .padding(24.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("¡Reserva confirmada!", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Detalles de la reserva:", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Detalles de la reserva:",
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold
+        )
 
-        InfoItem("Nombre", nombre)
-        InfoItem("Fecha", fecha)
-        InfoItem("Tipo de Rig", rigTipo)
-        InfoItem("Cantidad de Rigs", rigs)
-        InfoItem("Método de pago", metodo)
-        InfoItem("Total", "L. $total")
-        InfoItem("Código de reserva", codigo)
+        Spacer(modifier = Modifier.height(20.dp))
+
+        ReservaItem("Nombre", nombre)
+        ReservaItem("Fecha", fecha)
+        ReservaItem("Tipo de Rig", rigTipo)
+        ReservaItem("Cantidad de Rigs", rigs)
+        ReservaItem("Método de pago", metodo)
+        ReservaItem("Total", "L. $total")
+        ReservaItem("Código de reserva", codigo)
 
         Spacer(modifier = Modifier.height(30.dp))
-        Text("Gracias por reservar con Inercia 🏁", color = Color(0xFFFF6F00), fontSize = 16.sp)
+
+        Text(
+            text = "Gracias por reservar con Inercia 🏁",
+            color = Color(0xFFFF6F00),
+            fontSize = 14.sp
+        )
     }
 }
 
 @Composable
-fun InfoItem(label: String, value: String) {
+fun ReservaItem(label: String, value: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .background(Color.DarkGray, RoundedCornerShape(8.dp))
+            .padding(vertical = 4.dp)
+            .background(Color.DarkGray, RoundedCornerShape(10.dp))
             .padding(12.dp)
     ) {
-        Text(label, color = Color.Gray, fontSize = 12.sp)
-        Text(value, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Text(text = label, color = Color.Gray, fontSize = 12.sp)
+        Text(text = value, color = Color.White, fontSize = 16.sp)
     }
 }

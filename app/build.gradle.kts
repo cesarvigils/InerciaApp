@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,9 +10,10 @@ android {
     namespace = "com.example.inercia"
     compileSdk = 36
 
+
     defaultConfig {
         applicationId = "com.example.inercia"
-        minSdk = 28
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -46,7 +48,8 @@ android {
 dependencies {
     implementation(libs.firebase.auth.ktx.v2230)
     implementation(libs.firebase.database.ktx)
-
+    implementation(libs.material)
+    implementation(libs.material3)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

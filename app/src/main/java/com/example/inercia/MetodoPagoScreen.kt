@@ -28,9 +28,7 @@ fun MetodoPagoScreen(onSeleccionar: (String) -> Unit) {
         )
 
         MetodoPagoButton("Transferencia bancaria") {
-            onSeleccionar(
-                "Transferencia\nBanco Ficohsa: 00123456789\nBanco Atlántida: 00987654321\nBAC: 00345678900"
-            )
+            onSeleccionar("Transferencia bancaria")
         }
 
         MetodoPagoButton("Pago en efectivo (local)") {
@@ -56,3 +54,4 @@ fun MetodoPagoButton(texto: String, onClick: () -> Unit) {
         Text(text = texto, color = Color.White, fontSize = 16.sp)
     }
 }
+

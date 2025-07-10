@@ -100,6 +100,30 @@ fun ReservarScreen(navController: NavController) {
             FechaPickerInercia(fecha) { selectedFecha -> fecha = selectedFecha }
 
             Spacer(modifier = Modifier.height(16.dp))
+            val calendar = Calendar.getInstance()
+            val fechaParts = fecha.split("/")
+            val diaSemana = if (fechaParts.size == 3) {
+                calendar.set(fechaParts[2].toInt(), fechaParts[1].toInt() - 1, fechaParts[0].toInt())
+                calendar.get(Calendar.DAY_OF_WEEK)
+            } else Calendar.SUNDAY
+
+            val horaOpciones = when (diaSemana) {
+                Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY -> listOf(
+                    "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"
+                )
+                Calendar.SATURDAY -> listOf(
+                    "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
+                    "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"
+                )
+                else -> emptyList()
+            }
+
+            var horaSeleccionada by remember { mutableStateOf("") }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            SelectDropdown("Hora de reserva", horaSeleccionada, horaOpciones) { selected ->
+                horaSeleccionada = selected
+            }
 
             SelectDropdown("Tipo de rig", rigTipo, listOf("Normal", "Premium")) { selected -> rigTipo = selected }
 
@@ -128,9 +152,9 @@ fun ReservarScreen(navController: NavController) {
 
             if (mostrarMetodoPago) {
                 MetodoPagoScreen { metodo ->
-                    metodoPago = metodo
+                    metodoPago = metodo.trim()
                     mostrarMetodoPago = false
-                    if (metodo == "Transferencia bancaria") {
+                    if (metodoPago.equals("Transferencia bancaria", ignoreCase = true)) {
                         mensaje = "Revisa los datos bancarios en la siguiente pantalla"
                     }
                 }
@@ -138,12 +162,21 @@ fun ReservarScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (metodoPago == "Transferencia bancaria") {
+            if (metodoPago.trim().lowercase() == "transferencia bancaria") {
                 Button(
                     onClick = {
-                        val url = "https://wa.me/50499999999?text=Hola%20adjunto%20comprobante%20de%20pago"
+                        val message = "Buenas! Me dirijo desde la app de Inercia sobre una reservación con pago en transferencia. Adjunto comprobante."
+                        val url = "https://wa.me/50493266075?text=${Uri.encode(message)}"
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        context.startActivity(intent)
+                        intent.setPackage("com.whatsapp")
+                        try {
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            // Si falla, abrir navegador como respaldo
+                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            context.startActivity(browserIntent)
+                        }
+
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
@@ -161,31 +194,46 @@ fun ReservarScreen(navController: NavController) {
                     val horasInt = horas.toIntOrNull()
 
                     if (nombre.isNotEmpty() && fecha.isNotEmpty() && metodoPago.isNotEmpty() && rigsInt != null && horasInt != null) {
+                        val calendar = Calendar.getInstance()
+                        val fechaParts = fecha.split("/")
+                        val diaSemana = if (fechaParts.size == 3) {
+                            calendar.set(fechaParts[2].toInt(), fechaParts[1].toInt() - 1, fechaParts[0].toInt())
+                            calendar.get(Calendar.DAY_OF_WEEK)
+                        } else Calendar.SUNDAY
+
+                        if (diaSemana == Calendar.MONDAY) {
+                            mensaje = "No abrimos los lunes. Escoge otro día."
+                            return@Button
+                        }
+
                         if (rigTipo == "Premium" && rigsInt > 1) {
-                            mensaje = "Solo puedes reservar 1 rig Premium"
-                        } else {
-                            val precioHora = if (rigTipo == "Premium") 300 else 200
-                            val totalFinal = horasInt * rigsInt * precioHora
-                            val randomCode = "SI-0${Random.nextInt(10)}${Random.nextInt(10)}${Random.nextInt(10)}${Random.nextInt(10)}"
-                            val reserva = Reserva(nombre, fecha, rigTipo, rigsInt, totalFinal, metodoPago)
-                            val db = Firebase.database.reference
-                            val id = db.child("reservas").push().key
-                            if (id != null) {
-                                db.child("reservas").child(id).setValue(reserva)
-                                    .addOnSuccessListener {
-                                        val encodedNombre = Uri.encode(nombre)
-                                        val encodedFecha = Uri.encode(fecha)
-                                        val encodedRigTipo = Uri.encode(rigTipo)
-                                        val encodedMetodo = Uri.encode(metodoPago)
-                                        val encodedCode = Uri.encode(randomCode)
-                                        navController.navigate("thankyou/$encodedNombre/$encodedFecha/$encodedRigTipo/$rigs/$totalFinal/$encodedMetodo/$encodedCode") {
-                                            popUpTo("reserva") { inclusive = true }
-                                        }
+                            mensaje = "Solo puedes reservar 1 Simulador Premium"
+                            return@Button
+                        }
+
+                        val precioBase = if (rigTipo == "Premium") 300 else 200
+                        val precioHora = if (diaSemana == Calendar.TUESDAY) precioBase / 2 else precioBase
+                        val totalFinal = horasInt * rigsInt * precioHora
+
+                        val randomCode = "SI-0${Random.nextInt(10)}${Random.nextInt(10)}${Random.nextInt(10)}${Random.nextInt(10)}"
+                        val reserva = Reserva(nombre, fecha, rigTipo, rigsInt, totalFinal, metodoPago)
+                        val db = Firebase.database.reference
+                        val id = db.child("reservas").push().key
+                        if (id != null) {
+                            db.child("reservas").child(id).setValue(reserva)
+                                .addOnSuccessListener {
+                                    val encodedNombre = Uri.encode(nombre)
+                                    val encodedFecha = Uri.encode(fecha)
+                                    val encodedRigTipo = Uri.encode(rigTipo)
+                                    val encodedMetodo = Uri.encode(metodoPago)
+                                    val encodedCode = Uri.encode(randomCode)
+                                    navController.navigate("thankyou/$encodedNombre/$encodedFecha/$encodedRigTipo/$rigs/$totalFinal/$encodedMetodo/$encodedCode") {
+                                        popUpTo("reserva") { inclusive = true }
                                     }
-                                    .addOnFailureListener {
-                                        mensaje = "❌ Error al guardar"
-                                    }
-                            }
+                                }
+                                .addOnFailureListener {
+                                    mensaje = "❌ Error al guardar"
+                                }
                         }
                     } else {
                         mensaje = "Completa todos los campos"
@@ -203,8 +251,6 @@ fun ReservarScreen(navController: NavController) {
         }
     }
 }
-
-
 @Composable
 fun SelectDropdown(label: String, selected: String, options: List<String>, onSelect: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }

@@ -6,24 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,14 +24,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.inercia.ui.screens.ReservarScreen
+import com.example.inercia.ui.screens.*
 import com.example.inercia.ui.theme.InerciaTheme
-import com.example.inercia.AuthScreen
 import com.google.firebase.FirebaseApp
-import com.example.inercia.ui.screens.LoginScreen
-import com.example.inercia.ui.screens.RegisterScreen
-import com.example.inercia.ui.screens.ThankYouScreen
-import com.example.inercia.ui.screens.PerfilScreen
+import com.google.firebase.auth.FirebaseAuth
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,17 +37,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             InerciaTheme {
                 val navController = rememberNavController()
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.Black
-                ) {
-                    NavHost(navController = navController, startDestination = "login") {
+                val user = FirebaseAuth.getInstance().currentUser
+                val startDestination = if (user != null) "home" else "login"
+
+                Surface(modifier = Modifier.fillMaxSize(), color = Color.Black) {
+                    NavHost(navController = navController, startDestination = startDestination) {
                         composable("login") { LoginScreen(navController) }
                         composable("register") { RegisterScreen(navController) }
                         composable("home") { HomeScreen(navController) }
                         composable("reserva") { ReservarScreen(navController) }
                         composable("perfil") { PerfilScreen() }
-
                         composable(
                             "thankyou/{nombre}/{fecha}/{rigTipo}/{rigs}/{total}/{metodo}/{codigo}"
                         ) { backStackEntry ->
@@ -78,8 +61,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-
-
                 }
             }
         }
@@ -106,11 +87,8 @@ fun HomeScreen(navController: NavController) {
                 IconButton(onClick = { navController.navigate("perfil") }) {
                     Icon(Icons.Default.AccountCircle, contentDescription = "Cuenta", tint = Color.White)
                 }
-
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Black
-            )
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
         )
 
         ContentBody(navController)
@@ -177,7 +155,21 @@ fun ContentBody(navController: NavController) {
                     .height(200.dp),
                 contentScale = ContentScale.Crop
             )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Button(
+                onClick = {
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cerrar sesión", color = Color.White)
+            }
         }
     }
 }
-
